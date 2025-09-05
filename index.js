@@ -2,6 +2,8 @@ const inquirer = require('inquirer')
 const fs = require('fs')
 const path = require('path')
 const QRCode = require('qrcode');
+const Jimp = require('jimp')
+const QrCodeReader = require('qrcode-reader')
 const { up } = require('inquirer/lib/utils/readline');
 
 const uploadDir = path.join(__dirname, "uploads");
@@ -39,6 +41,22 @@ async function main(){
 
     const filePath = await generateQRCode(text.trim());
     console.log("QR code saved at:", filePath)
+
+    const { scanNow } = await inquirer.prompt([
+        { type:"confirm", name:"scanNow", message:"Scan the generated Qr now ?", default: true}
+    ]);
+
+    if (!scanNow) {
+        console.log("Done. You can scan later.");
+        return;
+    }
+
+    try{
+        const decode = await scanQRCode(filePath);
+        console.log("Decoded text", decode);
+    } catch (e) {
+        console.log("fail to scan:", e.message || e);
+    }
     
 
 }
